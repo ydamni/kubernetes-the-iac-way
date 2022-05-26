@@ -1,7 +1,7 @@
 # Kubernetes the IaC Way
 
 
-## Presentation
+## Introduction
 
 **kubernetes-the-iac-way** is a challenge I set myself after completing [Mumshad](https://github.com/mmumshad)'s version of [kubernetes-the-hard-way](https://github.com/mmumshad/kubernetes-the-hard-way).
 
