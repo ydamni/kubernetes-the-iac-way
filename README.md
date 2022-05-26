@@ -25,7 +25,7 @@ By doing so, Vagrant will take care of creating the nodes via the Vagrantfile, t
 
 RAM: 8 GB minimum | 16 GB recommended
 
-Disk space: 50 GB Disk space
+Disk space: 50 GB
 
 
 ### Software requirements
