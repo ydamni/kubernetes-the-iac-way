@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
       node.vm.network "public_network", ip: IP_NETWORK + "#{WORKER_IP_START + i}", bridge: "eno1"
       #Provide Memory/CPU
       node.vm.provider "virtualbox" do |v|
-        v.memory = 2048
+        v.memory = 1024
         v.cpus = 2
       end
       #Implement Ansible
