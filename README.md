@@ -29,7 +29,8 @@ Disk space: 50 GB
 
 
 ### Software requirements
-Install Vagrant (see: https://www.vagrantup.com/downloads).
+
+Install [Vagrant](https://www.vagrantup.com/downloads) & [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
 
 ## In the future
