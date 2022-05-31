@@ -22,12 +22,6 @@ Vagrant.configure("2") do |config|
         v.memory = 2048
         v.cpus = 2
       end
-      #Implement Ansible
-      node.ssh.insert_key = false
-      node.vm.provision "ansible" do |ansible|
-        ansible.verbose = "v"
-        ansible.playbook = "playbook.yml"
-      end
     end
   end
 end
@@ -44,12 +38,6 @@ Vagrant.configure("2") do |config|
       node.vm.provider "virtualbox" do |v|
         v.memory = 512
         v.cpus = 1
-      end
-      #Implement Ansible
-      node.ssh.insert_key = false
-      node.vm.provision "ansible" do |ansible|
-        ansible.verbose = "v"
-        ansible.playbook = "playbook.yml"
       end
     end
   end
@@ -68,11 +56,14 @@ Vagrant.configure("2") do |config|
         v.memory = 1024
         v.cpus = 2
       end
-      #Implement Ansible
-      node.ssh.insert_key = false
-      node.vm.provision "ansible" do |ansible|
-        ansible.verbose = "v"
-        ansible.playbook = "playbook.yml"
+      #Execute Ansible playbook
+      if i == NUM_WORKER_NODE
+        node.vm.provision "ansible" do |ansible|
+          #Apply Parallel Execution
+          ansible.limit = "all"
+          ansible.verbose = "v"
+          ansible.playbook = "playbook.yml"
+        end
       end
     end
   end

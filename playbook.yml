@@ -26,7 +26,7 @@
     -
       name: 'Modify Docker daemon to use cgroupdriver systemd'
       shell: |
-        sudo cat <<EOF | sudo tee /etc/docker/daemon.json  
+        cat <<EOF | sudo tee /etc/docker/daemon.json  
         {  
         "exec-opts": ["native.cgroupdriver=systemd"],  
         "log-driver": "json-file",  
@@ -53,7 +53,7 @@
     -
       name: 'Append nodes IP addresses to /etc/hosts file'
       shell: |
-        sudo cat <<EOF | sudo tee -a /etc/hosts
+        cat <<EOF | sudo tee -a /etc/hosts
         192.168.42.1 master-1
         192.168.42.2 master-2
         192.168.42.11 worker-1
@@ -335,7 +335,7 @@
       shell: |
         INTERNAL_IP=$(ip addr show enp0s8 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
         ETCD_NAME=$(hostname -s)
-        sudo cat <<EOF | sudo tee /etc/systemd/system/etcd.service
+        cat <<EOF | sudo tee /etc/systemd/system/etcd.service
         [Unit]
         Description=etcd
         Documentation=https://github.com/coreos
@@ -753,10 +753,11 @@
       name: 'Deploy Weave Network'
       shell: |
         kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+      ignore_errors: true #If there is an error, it means Weave Network is already deployed
       delegate_to: master-1
 -
   name: 'RBAC for Kubelet Authorization'
-  hosts: worker-2 ### master-1 will apply RBAC for Kubelet Authorization once worker-2 is created
+  hosts: master-1
   tasks:
     -
       name: 'Create system:kube-apiserver-to-kubelet ClusterRole to access Kubelet API'
@@ -783,7 +784,6 @@
             verbs:
               - "*"
         EOF
-      delegate_to: master-1
     -
       name: 'Bind the system:kube-apiserver-to-kubelet ClusterRole to the system:kube-apiserver user'
       shell: |
@@ -803,13 +803,11 @@
             kind: User
             name: kube-apiserver
         EOF
-      delegate_to: master-1
 -
   name: 'Deploying DNS Cluster Add-on'
-  hosts: worker-2 ### master-1 will deploy DNS Cluster Add-on once worker-2 is created
+  hosts: master-1
   tasks:
     -
       name: 'Deploy coredns Add-on'
       shell: |
         kubectl apply -f https://raw.githubusercontent.com/mmumshad/kubernetes-the-hard-way/master/deployments/coredns.yaml
-      delegate_to: master-1
