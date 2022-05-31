@@ -67,7 +67,7 @@ Vagrant.configure("2") do |config|
             ### Apply Parallel Execution
             ansible.limit = "all"
             ansible.verbose = "v"
-            ansible.playbook = ARRAY_PLAYBOOK[j-1]
+            ansible.playbook = "./playbooks/" + ARRAY_PLAYBOOK[j-1]
           end
         end
       end
