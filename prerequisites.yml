@@ -1,0 +1,78 @@
+-
+  name: 'Install Docker on Worker nodes'
+  hosts: worker-*
+  tasks:
+    -
+      name: 'Verify if Docker is installed'
+      stat:
+        path: /usr/bin/docker
+      register: docker_installed
+    -
+      name: 'Install Docker if not installed'
+      ### Install Docker && Add user 'vagrant' to group 'docker'
+      shell: 'curl -fsSL https://get.docker.com/ | sh && sudo usermod -aG docker $USER'
+      when: docker_installed.stat.islnk is not defined
+    -
+      name: 'Verify if pip3 is installed'
+      stat:
+        path: /usr/bin/pip3
+      register: pip_installed
+    -
+      name: 'Install pip3 & Docker SDK if not installed'
+      ### Update && Install pip3 && Install Docker SDK && Give access to Docker Socket for Docker API
+      shell: 'sudo apt -y update && sudo apt -y install python3-pip && sudo pip3 install docker && sudo chown $USER /var/run/docker.sock'
+      when: pip_installed.stat.islnk is not defined
+    -
+      name: 'Modify Docker daemon to use cgroupdriver systemd'
+      shell: |
+        cat <<EOF | sudo tee /etc/docker/daemon.json  
+        {  
+        "exec-opts": ["native.cgroupdriver=systemd"],  
+        "log-driver": "json-file",  
+        "log-opts": {  
+        "max-size": "100m"  
+        },  
+        "storage-driver": "overlay2"  
+        }  
+        EOF
+        sudo systemctl daemon-reload
+        sudo systemctl restart docker
+-
+  name: 'Allow bridge traffic on Worker nodes'
+  hosts: worker-*
+  tasks:
+    -
+      name: 'Allow bridge traffic'
+      shell: |
+        sudo sysctl net.bridge.bridge-nf-call-iptables=1
+-
+  name: 'Update /etc/hosts on all nodes'
+  hosts: all
+  tasks:
+    -
+      name: 'Append nodes IP addresses to /etc/hosts file'
+      shell: |
+        cat <<EOF | sudo tee -a /etc/hosts
+        192.168.42.1 master-1
+        192.168.42.2 master-2
+        192.168.42.11 worker-1
+        192.168.42.12 worker-2
+        192.168.42.21 loadbalancer-1
+        EOF
+-
+  name: 'Create a shared folder accessible for all nodes'
+  hosts: master-1
+  tasks:
+    -
+      name: 'Create shared folder'
+      shell: 'mkdir -p /vagrant/.vagrant/shared-folder'
+-
+  name: 'Install kubectl on Master nodes'
+  hosts: master-*
+  tasks:
+    -
+      name: 'Install kubectl v1.13.0'
+      shell: |
+        wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kubectl
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/

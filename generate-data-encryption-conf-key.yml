@@ -1,0 +1,32 @@
+-
+  name: 'Generating the Data Encryption Config and Key'
+  hosts: master-1
+  tasks:
+    -
+      name: 'Create encryption-config.yaml file'
+      shell: |
+        cd /vagrant/.vagrant/shared-folder
+        ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
+        cat > encryption-config.yaml <<EOF
+        kind: EncryptionConfig
+        apiVersion: v1
+        resources:
+          - resources:
+              - secrets
+            providers:
+              - aescbc:
+                  keys:
+                    - name: key1
+                      secret: ${ENCRYPTION_KEY}
+              - identity: {}
+        EOF
+-
+  name: 'Applying the Data Encryption Config on Master nodes'
+  hosts: master-*
+  tasks:
+    -
+      name: 'Copy encryption-config.yaml file to /var/lib/kubernetes'
+      shell: |
+        cd /vagrant/.vagrant/shared-folder
+        sudo mkdir -p /var/lib/kubernetes
+        sudo cp encryption-config.yaml /var/lib/kubernetes/

@@ -1,0 +1,26 @@
+-
+  name: 'Configuring kubectl for Remote Access'
+  hosts: master-*
+  tasks:
+    -
+      name: 'Generate kubeconfig file for authenticating as the admin user'
+      shell: |
+        cd /vagrant/.vagrant/shared-folder
+        {
+          LOADBALANCER_IP=192.168.42.21
+
+          kubectl config set-cluster kubernetes-the-hard-way \
+            --certificate-authority=ca.crt \
+            --embed-certs=true \
+            --server=https://${LOADBALANCER_IP}:6443
+
+          kubectl config set-credentials admin \
+            --client-certificate=admin.crt \
+            --client-key=admin.key
+
+          kubectl config set-context kubernetes-the-hard-way \
+            --cluster=kubernetes-the-hard-way \
+            --user=admin
+
+          kubectl config use-context kubernetes-the-hard-way
+        }

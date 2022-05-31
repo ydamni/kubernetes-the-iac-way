@@ -1,0 +1,8 @@
+-
+  name: 'Deploying DNS Cluster Add-on'
+  hosts: master-1
+  tasks:
+    -
+      name: 'Deploy coredns Add-on'
+      shell: |
+        kubectl apply -f https://raw.githubusercontent.com/mmumshad/kubernetes-the-hard-way/master/deployments/coredns.yaml
