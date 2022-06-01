@@ -42,6 +42,18 @@
       name: 'Create openssl configuration file for kube-apiserver'
       shell: |
         cd /vagrant/.vagrant/shared-folder
+        ALT_NAMES_IP=$({
+          LIST_IP=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep master-* | awk '{print $2}')
+          LOADBALANCER_IP=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep loadbalancer | awk '{print $2}')
+          i=2
+          for MASTER_IP in ${LIST_IP};do
+            echo "IP.$i = $MASTER_IP"
+            i=$((i+1))
+          done
+          echo "IP.$i = $LOADBALANCER_IP"
+          i=$((i+1))
+          echo "IP.$i = 127.0.0.1"
+        })
         cat > openssl.cnf <<EOF
         [req]
         req_extensions = v3_req
@@ -57,10 +69,7 @@
         DNS.3 = kubernetes.default.svc
         DNS.4 = kubernetes.default.svc.cluster.local
         IP.1 = 10.96.0.1
-        IP.2 = 192.168.42.1
-        IP.3 = 192.168.42.2
-        IP.4 = 192.168.42.21
-        IP.5 = 127.0.0.1
+        ${ALT_NAMES_IP}
         EOF
     -
       name: 'Create kube-apiserver crt, csr and key'
@@ -73,6 +82,15 @@
       name: 'Create openssl configuration file for etcd'
       shell: |
         cd /vagrant/.vagrant/shared-folder
+        ALT_NAMES_IP=$({
+          LIST_IP=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep master-* | awk '{print $2}')
+          i=1
+          for MASTER_IP in ${LIST_IP};do
+            echo "IP.$i = $MASTER_IP"
+            i=$((i+1))
+          done
+          echo "IP.$i = 127.0.0.1"
+        })
         cat > openssl-etcd.cnf <<EOF
         [req]
         req_extensions = v3_req
@@ -83,9 +101,7 @@
         keyUsage = nonRepudiation, digitalSignature, keyEncipherment
         subjectAltName = @alt_names
         [alt_names]
-        IP.1 = 192.168.42.1
-        IP.2 = 192.168.42.2
-        IP.3 = 127.0.0.1
+        ${ALT_NAMES_IP}
         EOF
     -
       name: 'Create etcd crt, csr and key'

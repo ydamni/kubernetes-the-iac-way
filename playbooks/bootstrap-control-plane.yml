@@ -24,6 +24,7 @@
       name: 'Create kube-apiserver service'
       shell: |
         INTERNAL_IP=$(ip addr show enp0s8 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
+        ETCD_SERVERS=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep master-* | awk '{print $2}' | sed 's/^/https:\/\//' | sed 's/$/:2379/' | tr '\n' ',' | sed 's/.$//')
         cat <<EOF | sudo tee /etc/systemd/system/kube-apiserver.service
         [Unit]
         Description=Kubernetes API Server
@@ -47,7 +48,7 @@
           --etcd-cafile=/var/lib/kubernetes/ca.crt \\
           --etcd-certfile=/var/lib/kubernetes/etcd-server.crt \\
           --etcd-keyfile=/var/lib/kubernetes/etcd-server.key \\
-          --etcd-servers=https://192.168.42.1:2379,https://192.168.42.2:2379 \\
+          --etcd-servers=${ETCD_SERVERS} \\
           --event-ttl=1h \\
           --encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
           --kubelet-certificate-authority=/var/lib/kubernetes/ca.crt \\
@@ -75,6 +76,7 @@
     -
       name: 'Create kube-controller-manager service'
       shell: |
+        CIDR=$(ip r s dev enp0s8 | awk '{print $1}')
         cat <<EOF | sudo tee /etc/systemd/system/kube-controller-manager.service
         [Unit]
         Description=Kubernetes Controller Manager
@@ -83,7 +85,7 @@
         [Service]
         ExecStart=/usr/local/bin/kube-controller-manager \\
           --address=0.0.0.0 \\
-          --cluster-cidr=192.168.42.0/24 \\
+          --cluster-cidr=${CIDR} \\
           --cluster-name=kubernetes \\
           --cluster-signing-cert-file=/var/lib/kubernetes/ca.crt \\
           --cluster-signing-key-file=/var/lib/kubernetes/ca.key \\
@@ -141,9 +143,11 @@
     -
       name: 'Modify haproxy configuration file'
       shell: |
+        INTERNAL_IP=$(ip addr show enp0s8 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
+        MASTER_NODES=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep master-* | sed 's/^/    server /' | sed 's/$/:6443 check fail 3 rise 2/')
         cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg 
         frontend kubernetes
-            bind 192.168.42.21:6443
+            bind ${INTERNAL_IP}:6443
             option tcplog
             mode tcp
             default_backend kubernetes-master-nodes
@@ -152,7 +156,6 @@
             mode tcp
             balance roundrobin
             option tcp-check
-            server master-1 192.168.42.1:6443 check fall 3 rise 2
-            server master-2 192.168.42.2:6443 check fall 3 rise 2
+        ${MASTER_NODES}
         EOF
         sudo service haproxy restart

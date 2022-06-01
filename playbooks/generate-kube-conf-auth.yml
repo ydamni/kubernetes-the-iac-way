@@ -6,11 +6,12 @@
       name: 'Generate kubeconfig file for kube-proxy'
       shell: |
         cd /vagrant/.vagrant/shared-folder
+        LOADBALANCER_IP=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep loadbalancer | awk '{print $2}')
         {
           kubectl config set-cluster kubernetes-the-hard-way \
             --certificate-authority=ca.crt \
             --embed-certs=true \
-            --server=https://192.168.42.21:6443 \
+            --server=https://${LOADBALANCER_IP}:6443 \
             --kubeconfig=kube-proxy.kubeconfig
 
           kubectl config set-credentials system:kube-proxy \

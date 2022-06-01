@@ -73,12 +73,13 @@
     -
       name: 'Configure kubelet to TLS Bootstrap'
       shell: |
+        LOADBALANCER_IP=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep loadbalancer | awk '{print $2}')
         cat <<EOF | sudo tee /var/lib/kubelet/bootstrap-kubeconfig
         apiVersion: v1
         clusters:
         - cluster:
             certificate-authority: /var/lib/kubernetes/ca.crt
-            server: https://192.168.42.21:6443
+            server: https://${LOADBALANCER_IP}:6443
           name: bootstrap
         contexts:
         - context:
@@ -151,13 +152,14 @@
     -
       name: 'Create kube-proxy configuration file'
       shell: |
+        CIDR=$(ip r s dev enp0s8 | awk '{print $1}')
         cat <<EOF | sudo tee /var/lib/kube-proxy/kube-proxy-config.yaml
         kind: KubeProxyConfiguration
         apiVersion: kubeproxy.config.k8s.io/v1alpha1
         clientConnection:
           kubeconfig: "/var/lib/kube-proxy/kubeconfig"
         mode: "iptables"
-        clusterCIDR: "192.168.42.0/24"
+        clusterCIDR: "${CIDR}"
         EOF
     -
       name: 'Create kube-proxy service'

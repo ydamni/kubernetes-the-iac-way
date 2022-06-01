@@ -33,8 +33,8 @@ Disk space: 50 GB
 Install [Vagrant](https://www.vagrantup.com/downloads) & [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
 
-## In the future
+## Modify the configuration
 
-Currently, the project allows to install Kubernetes on **two master nodes**, **two worker nodes** and **one load balancer node**; in the *192.168.42.0/24* subnet.
+By default, the project allows to install Kubernetes on **three master nodes**, **two worker nodes** and **one load balancer node**; in the *192.168.42.0/24* subnet.
 
-In the future, the code will allow to generate as many nodes as desired in any subnet by editing the Vagrantfile.
+You can generate as many master and worker nodes as desired in any subnet by editing the variables at the beginning of the Vagrantfile.

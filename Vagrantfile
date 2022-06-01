@@ -1,7 +1,6 @@
 ### Define number of Master and Worker nodes
-NUM_MASTER_NODE = 2
+NUM_MASTER_NODE = 3
 NUM_WORKER_NODE = 2
-NUM_LOADBALANCER_NODE = 1
 
 ### Define network
 IP_NETWORK = "192.168.42."
@@ -23,26 +22,24 @@ Vagrant.configure("2") do |config|
       node.vm.network "public_network", ip: IP_NETWORK + "#{MASTER_IP_START + i}", bridge: "eno1"
       ### Provide Memory/CPU
       node.vm.provider "virtualbox" do |v|
-        v.memory = 2048
+        v.memory = 1024
         v.cpus = 2
       end
     end
   end
 end
 
-### Create Load Balancer nodes
+### Create Load Balancer node
 Vagrant.configure("2") do |config|
-  (1..NUM_LOADBALANCER_NODE).each do |i|
-    config.vm.define "loadbalancer-#{i}" do |node|
-      ### Node config
-      node.vm.box = "ubuntu/focal64"
-      node.vm.hostname = "loadbalancer"
-      node.vm.network "public_network", ip: IP_NETWORK + "#{LOADBALANCER_IP_START + i}", bridge: "eno1"
-      ### Provide Memory/CPU
-      node.vm.provider "virtualbox" do |v|
-        v.memory = 512
-        v.cpus = 1
-      end
+  config.vm.define "loadbalancer" do |node|
+    ### Node config
+    node.vm.box = "ubuntu/focal64"
+    node.vm.hostname = "loadbalancer"
+    node.vm.network "public_network", ip: IP_NETWORK + "#{LOADBALANCER_IP_START + 1}", bridge: "eno1"
+    ### Provide Memory/CPU
+    node.vm.provider "virtualbox" do |v|
+      v.memory = 512
+      v.cpus = 1
     end
   end
 end

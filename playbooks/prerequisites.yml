@@ -46,26 +46,39 @@
       shell: |
         sudo sysctl net.bridge.bridge-nf-call-iptables=1
 -
-  name: 'Update /etc/hosts on all nodes'
-  hosts: all
-  tasks:
-    -
-      name: 'Append nodes IP addresses to /etc/hosts file'
-      shell: |
-        cat <<EOF | sudo tee -a /etc/hosts
-        192.168.42.1 master-1
-        192.168.42.2 master-2
-        192.168.42.11 worker-1
-        192.168.42.12 worker-2
-        192.168.42.21 loadbalancer-1
-        EOF
--
   name: 'Create a shared folder accessible for all nodes'
   hosts: master-1
   tasks:
     -
       name: 'Create shared folder'
       shell: 'mkdir -p /vagrant/.vagrant/shared-folder'
+-
+  name: 'Delete old inventory file'
+  hosts: master-1
+  tasks:
+    -
+      name: 'Delete old inventory file'
+      shell : 'rm -f /vagrant/.vagrant/shared-folder/inventory.txt'
+-
+  name: 'Store hostname & IP of all nodes'
+  hosts: all
+  tasks:
+    -
+      name: 'Store hostname & IP inside an inventory file'
+      shell: |
+        INTERNAL_IP=$(ip addr show enp0s8 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
+        HOSTNAME=$(hostname -s)
+        echo $HOSTNAME $INTERNAL_IP >> /vagrant/.vagrant/shared-folder/inventory.txt
+-
+  name: 'Update /etc/hosts on all nodes'
+  hosts: all
+  tasks:
+    -
+      name: 'Append nodes IP addresses to /etc/hosts file'
+      shell: |
+        cat <<EOF | sudo tee /etc/hosts
+        cat /vagrant/.vagrant/shared-folder/inventory.txt | awk '{print $2 " " $1}'
+        EOF
 -
   name: 'Install kubectl on Master nodes'
   hosts: master-*
