@@ -135,7 +135,7 @@
         sudo systemctl start kube-apiserver kube-controller-manager kube-scheduler
 -
   name: 'Kubernetes Frontend Load Balancer'
-  hosts: loadbalancer-1
+  hosts: loadbalancer
   tasks: 
     -
       name: 'Install haproxy'
@@ -144,7 +144,7 @@
       name: 'Modify haproxy configuration file'
       shell: |
         INTERNAL_IP=$(ip addr show enp0s8 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
-        MASTER_NODES=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep master-* | sed 's/^/    server /' | sed 's/$/:6443 check fail 3 rise 2/')
+        MASTER_NODES=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | grep master-* | sed 's/^/    server /' | sed 's/$/:6443 check fall 3 rise 2/')
         cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg 
         frontend kubernetes
             bind ${INTERNAL_IP}:6443

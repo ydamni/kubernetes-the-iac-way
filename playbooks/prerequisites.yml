@@ -69,15 +69,12 @@
         INTERNAL_IP=$(ip addr show enp0s8 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
         HOSTNAME=$(hostname -s)
         echo $HOSTNAME $INTERNAL_IP >> /vagrant/.vagrant/shared-folder/inventory.txt
--
-  name: 'Update /etc/hosts on all nodes'
-  hosts: all
-  tasks:
     -
       name: 'Append nodes IP addresses to /etc/hosts file'
       shell: |
-        cat <<EOF | sudo tee /etc/hosts
-        cat /vagrant/.vagrant/shared-folder/inventory.txt | awk '{print $2 " " $1}'
+        LIST_IP=$(cat /vagrant/.vagrant/shared-folder/inventory.txt | awk '{print $2 " " $1}')
+        cat <<EOF | sudo tee -a /etc/hosts
+        ${LIST_IP}
         EOF
 -
   name: 'Install kubectl on Master nodes'

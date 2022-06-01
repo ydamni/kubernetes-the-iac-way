@@ -1,5 +1,5 @@
 -
-  name: 'Provisioning pod Network (CNI)'
+  name: 'Provisioning pod Network (CNI) to worker nodes'
   hosts: worker-*
   tasks:
     -
@@ -7,9 +7,11 @@
       shell: |
         wget https://github.com/containernetworking/plugins/releases/download/v0.7.5/cni-plugins-amd64-v0.7.5.tgz
         sudo tar -xzvf cni-plugins-amd64-v0.7.5.tgz --directory /opt/cni/bin/
+-
+  name: 'Deploy Weave Network on master node'
+  hosts: master-1
+  tasks:
     -
       name: 'Deploy Weave Network'
       shell: |
         kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-      ignore_errors: true #If there is an error, it means Weave Network is already deployed
-      delegate_to: master-1
