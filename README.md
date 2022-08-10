@@ -1,6 +1,13 @@
 # Kubernetes the IaC Way
 
 
+## Technologies used
+
+![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white)
+![Ansible](https://img.shields.io/badge/ansible-%231A1918.svg?style=for-the-badge&logo=ansible&logoColor=white)
+![Vagrant](https://img.shields.io/badge/vagrant-%231563FF.svg?style=for-the-badge&logo=vagrant&logoColor=white)
+
+
 ## Introduction
 
 **kubernetes-the-iac-way** is a challenge I set myself after completing [Mumshad](https://github.com/mmumshad)'s version of [kubernetes-the-hard-way](https://github.com/mmumshad/kubernetes-the-hard-way).
